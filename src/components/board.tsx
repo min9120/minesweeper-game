@@ -1,10 +1,27 @@
+import * as React from 'react';
 import styled from 'styled-components';
 
 function Board() {
-  let mineMap = [];
-  for (let i = 0; i < 64; i++) {
-    mineMap.push(`${i}`);
+  const WIDTH: number = 8;
+  const TOTAL_CELL: number = WIDTH * WIDTH;
+  const TOTAL_MINE: number = 10;
+  const mineMap = new Array(TOTAL_CELL).fill(0);
+
+  function getRandomInt(max: number) {
+    return Math.floor(Math.random() * max);
   }
+
+  for (let i = 0; i < TOTAL_MINE; i++) {
+    const randomInt = getRandomInt(TOTAL_CELL);
+
+    if (mineMap[randomInt] === -1) {
+      i--;
+      continue;
+    }
+
+    mineMap[randomInt] = -1;
+  }
+
   return (
     <Wrapper>
       {mineMap.map((el, index) => {
