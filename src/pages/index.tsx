@@ -7,17 +7,33 @@ import DisplayBox from '../components/displayBox';
 function MainPage() {
   const WIDTH: number = 8;
   const TOTAL_MINE: number = 10;
+  const [mineCount, setMineCount] = useState(TOTAL_MINE);
+
   const [isOver, setOver] = useState(false);
+  const [isWin, setWin] = useState(false);
 
   return (
     <PageWrapper>
       <TopContentWrapper>
-        <DisplayBox value={4} />
-        <StateButton onClick={() => setOver(false)}>{isOver ? '😈' : '🙂'}</StateButton>
+        <DisplayBox value={mineCount} />
+        <StateButton
+          onClick={() => {
+            window.location.reload();
+          }}
+        >
+          {isOver ? '😈' : isWin ? '😎' : '🙂'}
+        </StateButton>
         <DisplayBox value={40} />
       </TopContentWrapper>
       <p>다시 시작 하고 싶다면 이모지를 누르세요👆</p>
-      <Board width={WIDTH} totalMine={TOTAL_MINE} setOver={(e) => setOver(e)}></Board>
+      <Board
+        width={WIDTH}
+        totalMine={TOTAL_MINE}
+        mineCount={mineCount}
+        setOver={(e) => setOver(e)}
+        setMineCount={(e) => setMineCount(e)}
+        setWin={(e) => setWin(e)}
+      ></Board>
     </PageWrapper>
   );
 }

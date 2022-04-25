@@ -3,12 +3,17 @@ import styled from 'styled-components';
 type BoardPropsType = {
   width: number;
   totalMine: number;
+  mineCount: number;
   setOver: (e: boolean) => void;
+  setMineCount: (e: number) => void;
+  setWin: (e: boolean) => void;
 };
 
 function Board(props: BoardPropsType) {
   const WIDTH = props.width;
   const TOTAL_MINE = props.totalMine;
+  const TOTAL_CELL = WIDTH * WIDTH;
+  const mineCount = props.mineCount;
   const [mineMap, setMineMap] = React.useState(initMineMap());
 
   function getRandomInt(max: number) {
@@ -138,6 +143,9 @@ function Board(props: BoardPropsType) {
     }
     setMineMap(newMineMap);
   }
+  function getOpenCellCount() {
+    return mineMap.map((value) => value.filter((v) => v.isOpen === true).length).reduce((pre, curr) => pre + curr);
+  }
   return (
     <GridWrapper>
       {mineMap.map((elements, indexX) =>
@@ -151,19 +159,28 @@ function Board(props: BoardPropsType) {
                 onClick={(e) => {
                   if (el.cell === 0) {
                     openSafeZone(indexX, indexY);
-                  }
-                  if (el.cell === -1) {
+                  } else if (el.cell === -1) {
                     openMines();
+                    props.setOver(true);
+                  } else {
+                    const newMineMap = [...mineMap];
+                    newMineMap[indexX][indexY].isOpen = true;
+                    setMineMap(newMineMap);
                   }
-
-                  e.currentTarget.style.display = 'none';
+                  if (getOpenCellCount() === TOTAL_CELL - TOTAL_MINE) {
+                    props.setWin(true);
+                  }
                 }}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   if (e.currentTarget.innerText === '') {
                     e.currentTarget.innerText = '🚩';
+                    e.currentTarget.disabled = true;
+                    props.setMineCount(mineCount - 1);
                   } else {
                     e.currentTarget.innerText = '';
+                    e.currentTarget.disabled = false;
+                    props.setMineCount(mineCount + 1);
                   }
                 }}
               ></GridButton>
@@ -213,4 +230,8 @@ const GridButton = styled.button`
   background-color: #bdbdbd;
   font-size: 20px;
   font-weight: bold;
+  :disabled {
+    background-color: #bdbdbd;
+    color: #000000;
+  }
 `;
