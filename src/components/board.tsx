@@ -80,7 +80,7 @@ function Board(props: BoardPropsType) {
     }
     return mineMap;
   }
-  function onSearchArround(x: number, y: number) {
+  function openSafeZone(x: number, y: number) {
     const newMineMap = [...mineMap];
     const zeroInCell: { x: number; y: number }[] = [];
 
@@ -122,11 +122,21 @@ function Board(props: BoardPropsType) {
     }
     if (zeroInCell.length) {
       zeroInCell.forEach((cell) => {
-        onSearchArround(cell.x, cell.y);
+        openSafeZone(cell.x, cell.y);
       });
     } else {
       setMineMap(newMineMap);
     }
+  }
+  function openMines() {
+    const newMineMap = [...mineMap];
+    for (let x = 0; x < newMineMap.length; x++) {
+      for (let y = 0; y < newMineMap[0].length; y++) {
+        if (newMineMap[x][y].cell !== -1) continue;
+        newMineMap[x][y].cell === -1 ? (newMineMap[x][y].isOpen = true) : null;
+      }
+    }
+    setMineMap(newMineMap);
   }
   return (
     <GridWrapper>
@@ -140,7 +150,10 @@ function Board(props: BoardPropsType) {
                 }}
                 onClick={(e) => {
                   if (el.cell === 0) {
-                    onSearchArround(indexX, indexY);
+                    openSafeZone(indexX, indexY);
+                  }
+                  if (el.cell === -1) {
+                    openMines();
                   }
 
                   e.currentTarget.style.display = 'none';
