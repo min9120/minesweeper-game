@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import Board from '../components/board';
 import DisplayBox from '../components/displayBox';
@@ -6,7 +7,7 @@ import DisplayBox from '../components/displayBox';
 function MainPage() {
   const WIDTH: number = 8;
   const TOTAL_MINE: number = 10;
-  const [isOver, setOver] = React.useState(false);
+  const [isOver, setOver] = useState(false);
 
   return (
     <PageWrapper>

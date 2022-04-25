@@ -5,93 +5,156 @@ type BoardPropsType = {
   totalMine: number;
   setOver: (e: boolean) => void;
 };
+
 function Board(props: BoardPropsType) {
   const WIDTH = props.width;
   const TOTAL_MINE = props.totalMine;
-  const mineMap = Array.from(Array(WIDTH), () => Array(WIDTH).fill(0));
+  const [mineMap, setMineMap] = React.useState(initMineMap());
 
   function getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
   }
-  function initRandomMine() {
+  function initRandomMine(mineMap: { cell: number; isOpen: boolean }[][]) {
     for (let i = 0; i < TOTAL_MINE; i++) {
       const randomIntX = getRandomInt(WIDTH);
       const randomIntY = getRandomInt(WIDTH);
 
-      if (mineMap[randomIntX][randomIntY] === -1) {
+      if (mineMap[randomIntX][randomIntY].cell === -1) {
         i--;
         continue;
       }
 
-      mineMap[randomIntX][randomIntY] = -1;
+      mineMap[randomIntX][randomIntY].cell = -1;
     }
+
+    return mineMap;
   }
   function initMineMap() {
+    let mineMap = Array.from(Array(WIDTH), () => {
+      return Array(WIDTH)
+        .fill(undefined)
+        .map(() => {
+          return {
+            cell: 0,
+            isOpen: false,
+          };
+        });
+    });
+    mineMap = initRandomMine(mineMap);
+
     for (let x = 0; x < WIDTH; x++) {
       for (let y = 0; y < WIDTH; y++) {
         let mineCount: number = 0;
-        if (mineMap[x][y] === -1) continue;
+        if (mineMap[x][y].cell === -1) continue;
         // 윗줄
         if (x > 0) {
-          mineMap[x - 1][y] === -1 ? mineCount++ : null;
+          mineMap[x - 1][y].cell === -1 ? mineCount++ : null;
           if (y > 0) {
-            mineMap[x - 1][y - 1] === -1 ? mineCount++ : null;
+            mineMap[x - 1][y - 1].cell === -1 ? mineCount++ : null;
           }
           if (y < WIDTH - 1) {
-            mineMap[x - 1][y + 1] === -1 ? mineCount++ : null;
+            mineMap[x - 1][y + 1].cell === -1 ? mineCount++ : null;
           }
         }
         // 왼쪽
         if (y > 0) {
-          mineMap[x][y - 1] === -1 ? mineCount++ : null;
+          mineMap[x][y - 1].cell === -1 ? mineCount++ : null;
         }
         // 오른쪽
         if (y < WIDTH - 1) {
-          mineMap[x][y + 1] === -1 ? mineCount++ : null;
+          mineMap[x][y + 1].cell === -1 ? mineCount++ : null;
         }
         // 아랫줄
         if (x < WIDTH - 1) {
-          mineMap[x + 1][y] === -1 ? mineCount++ : null;
+          mineMap[x + 1][y].cell === -1 ? mineCount++ : null;
           if (y > 0) {
-            mineMap[x + 1][y - 1] === -1 ? mineCount++ : null;
+            mineMap[x + 1][y - 1].cell === -1 ? mineCount++ : null;
           }
           if (y < WIDTH - 1) {
-            mineMap[x + 1][y + 1] === -1 ? mineCount++ : null;
+            mineMap[x + 1][y + 1].cell === -1 ? mineCount++ : null;
           }
         }
 
-        mineMap[x][y] = mineCount;
+        mineMap[x][y].cell = mineCount;
       }
     }
+    return mineMap;
   }
+  function onSearchArround(x: number, y: number) {
+    const newMineMap = [...mineMap];
+    const zeroInCell: { x: number; y: number }[] = [];
 
-  initRandomMine();
-  initMineMap();
+    function cellOpen(x: number, y: number) {
+      if (newMineMap[x][y].isOpen === false) {
+        newMineMap[x][y].isOpen = true;
+        newMineMap[x][y].cell === 0 && zeroInCell.push({ x, y });
+      }
+    }
+
+    if (x > 0) {
+      cellOpen(x - 1, y);
+
+      if (y > 0) {
+        cellOpen(x - 1, y - 1);
+      }
+      if (y < WIDTH - 1) {
+        cellOpen(x - 1, y + 1);
+      }
+    }
+    // 왼쪽
+    if (y > 0) {
+      cellOpen(x, y - 1);
+    }
+    // 오른쪽
+    if (y < WIDTH - 1) {
+      cellOpen(x, y + 1);
+    }
+    // 아랫줄
+    if (x < WIDTH - 1) {
+      cellOpen(x + 1, y);
+
+      if (y > 0) {
+        cellOpen(x + 1, y - 1);
+      }
+      if (y < WIDTH - 1) {
+        cellOpen(x + 1, y + 1);
+      }
+    }
+    if (zeroInCell.length) {
+      zeroInCell.forEach((cell) => {
+        onSearchArround(cell.x, cell.y);
+      });
+    } else {
+      setMineMap(newMineMap);
+    }
+  }
   return (
     <GridWrapper>
-      {mineMap.map((elements) =>
-        elements.map((el, index) => {
+      {mineMap.map((elements, indexX) =>
+        elements.map((el, indexY) => {
           return (
-            <GridItemWrapper key={`${index}-${el}`}>
+            <GridItemWrapper key={indexY}>
               <GridButton
+                style={{
+                  display: el.isOpen ? 'none' : 'block',
+                }}
                 onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (el === -1) {
-                    props.setOver(true);
+                  if (el.cell === 0) {
+                    onSearchArround(indexX, indexY);
                   }
+
                   e.currentTarget.style.display = 'none';
                 }}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   if (e.currentTarget.innerText === '') {
-                    e.currentTarget.innerText = '📌';
+                    e.currentTarget.innerText = '🚩';
                   } else {
                     e.currentTarget.innerText = '';
                   }
                 }}
               ></GridButton>
-              <GridItem>{el}</GridItem>
+              <GridItem>{el.cell === 0 ? '' : el.cell === -1 ? '💣' : el.cell}</GridItem>
             </GridItemWrapper>
           );
         }),
@@ -135,6 +198,6 @@ const GridButton = styled.button`
   width: 100%;
   height: 100%;
   background-color: #bdbdbd;
-  font-size: 12px;
+  font-size: 20px;
   font-weight: bold;
 `;
