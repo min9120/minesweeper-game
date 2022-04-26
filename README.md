@@ -20,17 +20,23 @@
 ## 프로젝트 구조
 
 ├── components(UI 컴포넌트)  
-│ ├── board.tsx  
-│ ├── displayBox.tsx  
-│ └── timer.tsx  
+│  ├── board.tsx  
+│  ├── displayBox.tsx  
+│  └── timer.tsx  
 ├── modules(Global State 관리)  
-│ ├── gameStore.ts  
-│ └── index.tsx  
+│  ├── gameStore.ts  
+│  └── index.tsx  
 ├── pages(페이지 라우팅)  
-│ └── index.tsx  
+│  └── index.tsx  
 ├── styles(Global Style)  
-│ └── global.ts  
+│  └── global.ts  
 ├── utils(보조 기능)  
-│ └── randomUtil.ts
+│  └── randomUtil.ts
 
 <br/>
+
+<img src ="https://user-images.githubusercontent.com/44824463/165353684-3da717f1-1ae5-4c7d-8bed-aabdf9ab643a.jpeg" alt ="" width="600px" height="1000px"/>
+
+1. 남은 지뢰 수
+2. 다시 시작 버튼 ( 게임에서 지면 '😈', 이기면 '😎', 기본 '🙂 ' )
+3. 타이머 ( 첫 셀 클릭 시 동작 ) 
