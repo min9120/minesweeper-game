@@ -22,7 +22,7 @@ const Board = observer(() => {
     game.checkWin();
   }
 
-  function onRightClick(e: React.MouseEvent<HTMLButtonElement>) {
+  function onRightClickHandler(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
     if (e.currentTarget.innerText === '') {
       e.currentTarget.innerText = '🚩';
@@ -46,7 +46,7 @@ const Board = observer(() => {
                 onClick={() => {
                   onClickHandler(cell, { x, y });
                 }}
-                onContextMenu={onRightClick}
+                onContextMenu={onRightClickHandler}
               />
               <GridItem>{cell.isZero() ? '' : cell.isMine() ? '💣' : cell.cell}</GridItem>
             </GridItemWrapper>
