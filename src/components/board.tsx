@@ -4,10 +4,16 @@ type BoardPropsType = {
   width: number;
   totalMine: number;
   mineCount: number;
+  isStart: boolean;
   setOver: (e: boolean) => void;
   setMineCount: (e: number) => void;
   setWin: (e: boolean) => void;
+  setStart: (e: boolean) => void;
 };
+interface MineMap {
+  cell: number;
+  isOpen: boolean;
+}
 
 function Board(props: BoardPropsType) {
   const WIDTH = props.width;
@@ -19,7 +25,7 @@ function Board(props: BoardPropsType) {
   function getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
   }
-  function initRandomMine(mineMap: { cell: number; isOpen: boolean }[][]) {
+  function initRandomMine(mineMap: MineMap[][]) {
     for (let i = 0; i < TOTAL_MINE; i++) {
       const randomIntX = getRandomInt(WIDTH);
       const randomIntY = getRandomInt(WIDTH);
@@ -146,6 +152,25 @@ function Board(props: BoardPropsType) {
   function getOpenCellCount() {
     return mineMap.map((value) => value.filter((v) => v.isOpen === true).length).reduce((pre, curr) => pre + curr);
   }
+
+  const onClickHandler = (el: MineMap, pos: { x: number; y: number }) => {
+    if (el.cell === 0) {
+      openSafeZone(pos.x, pos.y);
+    } else if (el.cell === -1) {
+      openMines();
+      props.setOver(true);
+    } else {
+      const newMineMap = [...mineMap];
+      newMineMap[pos.x][pos.y].isOpen = true;
+      setMineMap(newMineMap);
+    }
+    if (getOpenCellCount() === TOTAL_CELL - TOTAL_MINE) {
+      props.setWin(true);
+    }
+    if (!props.isStart) {
+      props.setStart(true);
+    }
+  };
   return (
     <GridWrapper>
       {mineMap.map((elements, indexX) =>
@@ -156,20 +181,8 @@ function Board(props: BoardPropsType) {
                 style={{
                   display: el.isOpen ? 'none' : 'block',
                 }}
-                onClick={(e) => {
-                  if (el.cell === 0) {
-                    openSafeZone(indexX, indexY);
-                  } else if (el.cell === -1) {
-                    openMines();
-                    props.setOver(true);
-                  } else {
-                    const newMineMap = [...mineMap];
-                    newMineMap[indexX][indexY].isOpen = true;
-                    setMineMap(newMineMap);
-                  }
-                  if (getOpenCellCount() === TOTAL_CELL - TOTAL_MINE) {
-                    props.setWin(true);
-                  }
+                onClick={() => {
+                  onClickHandler(el, { x: indexX, y: indexY });
                 }}
                 onContextMenu={(e) => {
                   e.preventDefault();

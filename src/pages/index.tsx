@@ -3,6 +3,7 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import Board from '../components/board';
 import DisplayBox from '../components/displayBox';
+import Timer from '../components/timer';
 
 function MainPage() {
   const WIDTH: number = 8;
@@ -10,6 +11,7 @@ function MainPage() {
   const [mineCount, setMineCount] = useState(TOTAL_MINE);
 
   const [isOver, setOver] = useState(false);
+  const [isStart, setStart] = useState(false);
   const [isWin, setWin] = useState(false);
 
   return (
@@ -23,16 +25,18 @@ function MainPage() {
         >
           {isOver ? '😈' : isWin ? '😎' : '🙂'}
         </StateButton>
-        <DisplayBox value={40} />
+        <Timer isOver={isOver} isStart={isStart} isWin={isWin} />
       </TopContentWrapper>
       <p>다시 시작 하고 싶다면 이모지를 누르세요👆</p>
       <Board
         width={WIDTH}
         totalMine={TOTAL_MINE}
         mineCount={mineCount}
+        isStart={isStart}
         setOver={(e) => setOver(e)}
         setMineCount={(e) => setMineCount(e)}
         setWin={(e) => setWin(e)}
+        setStart={(e) => setStart(e)}
       ></Board>
     </PageWrapper>
   );
