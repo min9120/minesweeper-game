@@ -1,211 +1,62 @@
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
 import styled from 'styled-components';
-type BoardPropsType = {
-  width: number;
-  totalMine: number;
-  mineCount: number;
-  isStart: boolean;
-  setOver: (e: boolean) => void;
-  setMineCount: (e: number) => void;
-  setWin: (e: boolean) => void;
-  setStart: (e: boolean) => void;
-};
-interface Cell {
-  cell: number;
-  isOpen: boolean;
-}
-type MineMap = Cell[][];
+import { GlobalStateContext } from '../modules';
+import { Cell } from '../modules/gameStore';
 
-function Board(props: BoardPropsType) {
-  const WIDTH = props.width;
-  const TOTAL_MINE = props.totalMine;
-  const TOTAL_CELL = WIDTH * WIDTH;
-  const mineCount = props.mineCount;
-  const [mineMap, setMineMap] = React.useState(initMineMap());
+const Board = observer(() => {
+  const game = React.useContext(GlobalStateContext);
 
-  function getRandomInt(max: number) {
-    return Math.floor(Math.random() * max);
-  }
-  function initRandomMine(mineMap: MineMap) {
-    for (let i = 0; i < TOTAL_MINE; i++) {
-      const randomIntX = getRandomInt(WIDTH);
-      const randomIntY = getRandomInt(WIDTH);
-
-      if (mineMap[randomIntX][randomIntY].cell === -1) {
-        i--;
-        continue;
-      }
-
-      mineMap[randomIntX][randomIntY].cell = -1;
+  function onClickHandler(cell: Cell, pos: { x: number; y: number }) {
+    if (!game.isStart) {
+      game.start();
     }
 
-    return mineMap;
-  }
-  function initMineMap() {
-    let mineMap = Array.from(Array(WIDTH), () => {
-      return Array(WIDTH)
-        .fill(undefined)
-        .map(() => {
-          return {
-            cell: 0,
-            isOpen: false,
-          };
-        });
-    });
-    mineMap = initRandomMine(mineMap);
-
-    for (let x = 0; x < WIDTH; x++) {
-      for (let y = 0; y < WIDTH; y++) {
-        let mineCount: number = 0;
-        if (mineMap[x][y].cell === -1) continue;
-        // 윗줄
-        if (x > 0) {
-          mineMap[x - 1][y].cell === -1 ? mineCount++ : null;
-          if (y > 0) {
-            mineMap[x - 1][y - 1].cell === -1 ? mineCount++ : null;
-          }
-          if (y < WIDTH - 1) {
-            mineMap[x - 1][y + 1].cell === -1 ? mineCount++ : null;
-          }
-        }
-        // 왼쪽
-        if (y > 0) {
-          mineMap[x][y - 1].cell === -1 ? mineCount++ : null;
-        }
-        // 오른쪽
-        if (y < WIDTH - 1) {
-          mineMap[x][y + 1].cell === -1 ? mineCount++ : null;
-        }
-        // 아랫줄
-        if (x < WIDTH - 1) {
-          mineMap[x + 1][y].cell === -1 ? mineCount++ : null;
-          if (y > 0) {
-            mineMap[x + 1][y - 1].cell === -1 ? mineCount++ : null;
-          }
-          if (y < WIDTH - 1) {
-            mineMap[x + 1][y + 1].cell === -1 ? mineCount++ : null;
-          }
-        }
-
-        mineMap[x][y].cell = mineCount;
-      }
-    }
-    return mineMap;
-  }
-  function openSafeZone(x: number, y: number) {
-    const newMineMap = [...mineMap];
-    const zeroInCell: { x: number; y: number }[] = [];
-
-    function cellOpen(x: number, y: number) {
-      if (newMineMap[x][y].isOpen === false) {
-        newMineMap[x][y].isOpen = true;
-        newMineMap[x][y].cell === 0 && zeroInCell.push({ x, y });
-      }
-    }
-
-    if (x > 0) {
-      cellOpen(x - 1, y);
-
-      if (y > 0) {
-        cellOpen(x - 1, y - 1);
-      }
-      if (y < WIDTH - 1) {
-        cellOpen(x - 1, y + 1);
-      }
-    }
-    // 왼쪽
-    if (y > 0) {
-      cellOpen(x, y - 1);
-    }
-    // 오른쪽
-    if (y < WIDTH - 1) {
-      cellOpen(x, y + 1);
-    }
-    // 아랫줄
-    if (x < WIDTH - 1) {
-      cellOpen(x + 1, y);
-
-      if (y > 0) {
-        cellOpen(x + 1, y - 1);
-      }
-      if (y < WIDTH - 1) {
-        cellOpen(x + 1, y + 1);
-      }
-    }
-    if (zeroInCell.length) {
-      zeroInCell.forEach((cell) => {
-        openSafeZone(cell.x, cell.y);
-      });
+    if (cell.isZero()) {
+      game.openSafeCells(pos.x, pos.y);
+    } else if (cell.isMine()) {
+      game.openMines();
     } else {
-      setMineMap(newMineMap);
+      game.openCell(pos.x, pos.y);
     }
-  }
-  function openMines() {
-    const newMineMap = [...mineMap];
-    for (let x = 0; x < newMineMap.length; x++) {
-      for (let y = 0; y < newMineMap[0].length; y++) {
-        if (newMineMap[x][y].cell !== -1) continue;
-        newMineMap[x][y].cell === -1 ? (newMineMap[x][y].isOpen = true) : null;
-      }
-    }
-    setMineMap(newMineMap);
-  }
-  function getOpenCellCount() {
-    return mineMap.map((value) => value.filter((v) => v.isOpen === true).length).reduce((pre, curr) => pre + curr);
+    game.checkWin();
   }
 
-  const onClickHandler = (el: Cell, pos: { x: number; y: number }) => {
-    if (el.cell === 0) {
-      openSafeZone(pos.x, pos.y);
-    } else if (el.cell === -1) {
-      openMines();
-      props.setOver(true);
+  function onRightClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    if (e.currentTarget.innerText === '') {
+      e.currentTarget.innerText = '🚩';
+      e.currentTarget.disabled = true;
+      game.saveMineCount(game.mineCount - 1);
     } else {
-      const newMineMap = [...mineMap];
-      newMineMap[pos.x][pos.y].isOpen = true;
-      setMineMap(newMineMap);
+      e.currentTarget.innerText = '';
+      e.currentTarget.disabled = false;
+      game.saveMineCount(game.mineCount + 1);
     }
-    if (getOpenCellCount() === TOTAL_CELL - TOTAL_MINE) {
-      props.setWin(true);
-    }
-    if (!props.isStart) {
-      props.setStart(true);
-    }
-  };
+  }
+
   return (
     <GridWrapper>
-      {mineMap.map((elements, indexX) =>
-        elements.map((el, indexY) => {
+      {game.board.map((rows, x) =>
+        rows.map((cell, y) => {
           return (
-            <GridItemWrapper key={indexY}>
+            <GridItemWrapper key={y}>
               <GridButton
-                style={{
-                  display: el.isOpen ? 'none' : 'block',
-                }}
+                isOpen={cell.isOpen}
                 onClick={() => {
-                  onClickHandler(el, { x: indexX, y: indexY });
+                  onClickHandler(cell, { x, y });
                 }}
-                onContextMenu={(e) => {
-                  e.preventDefault();
-                  if (e.currentTarget.innerText === '') {
-                    e.currentTarget.innerText = '🚩';
-                    e.currentTarget.disabled = true;
-                    props.setMineCount(mineCount - 1);
-                  } else {
-                    e.currentTarget.innerText = '';
-                    e.currentTarget.disabled = false;
-                    props.setMineCount(mineCount + 1);
-                  }
-                }}
-              ></GridButton>
-              <GridItem>{el.cell === 0 ? '' : el.cell === -1 ? '💣' : el.cell}</GridItem>
+                onContextMenu={onRightClick}
+              />
+              <GridItem>{cell.isZero() ? '' : cell.isMine() ? '💣' : cell.cell}</GridItem>
             </GridItemWrapper>
           );
         }),
       )}
     </GridWrapper>
   );
-}
+});
+0;
 export default Board;
 
 const GridWrapper = styled.div`
@@ -237,7 +88,8 @@ const GridItem = styled.div`
   align-items: center;
   justify-content: center;
 `;
-const GridButton = styled.button`
+const GridButton = styled.button<{ isOpen: boolean }>`
+  display: ${(props) => (props.isOpen ? 'none' : 'block')};
   position: absolute;
   width: 100%;
   height: 100%;

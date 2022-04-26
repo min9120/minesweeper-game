@@ -1,50 +1,32 @@
+import { observer } from 'mobx-react-lite';
 import * as React from 'react';
-import { useState } from 'react';
 import styled from 'styled-components';
 import Board from '../components/board';
-import Chart from '../components/chart';
 import DisplayBox from '../components/displayBox';
 import Timer from '../components/timer';
+import { GlobalStateContext } from '../modules';
 
-function MainPage() {
-  const WIDTH: number = 8;
-  const TOTAL_MINE: number = 10;
-  const [mineCount, setMineCount] = useState(TOTAL_MINE);
-
-  const [isOver, setOver] = useState(false);
-  const [isStart, setStart] = useState(false);
-  const [isWin, setWin] = useState(false);
+const MainPage = observer(() => {
+  const game = React.useContext(GlobalStateContext);
 
   return (
     <PageWrapper>
       <TopContentWrapper>
-        <DisplayBox value={mineCount} />
+        <DisplayBox value={game.mineCount} />
         <StateButton
           onClick={() => {
-            window.location.reload();
+            game.reset();
           }}
         >
-          {isOver ? '😈' : isWin ? '😎' : '🙂'}
+          {game.isOver ? '😈' : game.isWin ? '😎' : '🙂'}
         </StateButton>
-        <Timer isOver={isOver} isStart={isStart} isWin={isWin} />
+        <Timer isOver={game.isOver} isStart={game.isStart} isWin={game.isWin} />
       </TopContentWrapper>
       <p>다시 시작 하고 싶다면 이모지를 누르세요👆</p>
-      <Board
-        width={WIDTH}
-        totalMine={TOTAL_MINE}
-        mineCount={mineCount}
-        isStart={isStart}
-        setOver={(e) => setOver(e)}
-        setMineCount={(e) => setMineCount(e)}
-        setWin={(e) => setWin(e)}
-        setStart={(e) => setStart(e)}
-      ></Board>
-      <p> 내가 가장 빨랐던 순간들</p>
-      <Chart></Chart>
+      <Board />
     </PageWrapper>
   );
-}
-
+});
 export default MainPage;
 
 const PageWrapper = styled.div`

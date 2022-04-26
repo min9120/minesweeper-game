@@ -18,6 +18,10 @@ function Timer(props: TimerPropsType) {
         setSec(sec + 1);
       }
     }, 1000);
+
+    if (!props.isOver && !props.isStart && !props.isWin) {
+      setSec(0);
+    }
   }, [sec, props.isStart, props.isOver, props.isWin]);
 
   return <DisplayBox value={sec}></DisplayBox>;
