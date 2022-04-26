@@ -18,21 +18,22 @@
 - CRA 통한 프로젝트 셋업
 
 ## 프로젝트 구조
-
-├── components(UI 컴포넌트)  
+src 폴더 하위 구조입니다.
+```
+├── components          //UI 컴포넌트
 │  ├── board.tsx  
 │  ├── displayBox.tsx  
 │  └── timer.tsx  
-├── modules(Global State 관리)  
+├── modules             //Global State 관리  
 │  ├── gameStore.ts  
 │  └── index.tsx  
-├── pages(페이지 라우팅)  
+├── pages               //페이지 라우팅  
 │  └── index.tsx  
 ├── styles(Global Style)  
 │  └── global.ts  
-├── utils(보조 기능)  
+├── utils               //보조 기능  
 │  └── randomUtil.ts
-
+```
 <br/>
 
 <img src ="https://user-images.githubusercontent.com/44824463/165353684-3da717f1-1ae5-4c7d-8bed-aabdf9ab643a.jpeg" alt ="" width="600px" height="1000px"/>
