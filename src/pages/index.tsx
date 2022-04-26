@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import styled from 'styled-components';
 import Board from '../components/board';
+import Chart from '../components/chart';
 import DisplayBox from '../components/displayBox';
 import Timer from '../components/timer';
 
@@ -38,6 +39,8 @@ function MainPage() {
         setWin={(e) => setWin(e)}
         setStart={(e) => setStart(e)}
       ></Board>
+      <p> 내가 가장 빨랐던 순간들</p>
+      <Chart></Chart>
     </PageWrapper>
   );
 }

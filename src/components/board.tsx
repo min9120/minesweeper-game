@@ -10,10 +10,11 @@ type BoardPropsType = {
   setWin: (e: boolean) => void;
   setStart: (e: boolean) => void;
 };
-interface MineMap {
+interface Cell {
   cell: number;
   isOpen: boolean;
 }
+type MineMap = Cell[][];
 
 function Board(props: BoardPropsType) {
   const WIDTH = props.width;
@@ -25,7 +26,7 @@ function Board(props: BoardPropsType) {
   function getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
   }
-  function initRandomMine(mineMap: MineMap[][]) {
+  function initRandomMine(mineMap: MineMap) {
     for (let i = 0; i < TOTAL_MINE; i++) {
       const randomIntX = getRandomInt(WIDTH);
       const randomIntY = getRandomInt(WIDTH);
@@ -153,7 +154,7 @@ function Board(props: BoardPropsType) {
     return mineMap.map((value) => value.filter((v) => v.isOpen === true).length).reduce((pre, curr) => pre + curr);
   }
 
-  const onClickHandler = (el: MineMap, pos: { x: number; y: number }) => {
+  const onClickHandler = (el: Cell, pos: { x: number; y: number }) => {
     if (el.cell === 0) {
       openSafeZone(pos.x, pos.y);
     } else if (el.cell === -1) {
