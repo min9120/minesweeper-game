@@ -4,10 +4,12 @@ import { getRandomInt } from '../utils/randomUtil';
 export class Cell {
   cell: number;
   isOpen: boolean;
+  isPicked: boolean;
 
-  constructor(cell: number, isOpen: boolean) {
+  constructor(cell: number, isOpen: boolean, isPicked: boolean) {
     this.cell = cell;
     this.isOpen = isOpen;
+    this.isPicked = isPicked;
   }
 
   isZero() {
@@ -20,6 +22,12 @@ export class Cell {
 
   open() {
     this.isOpen = true;
+  }
+  pickFlag() {
+    this.isPicked = true;
+  }
+  removeFlag() {
+    this.isPicked = false;
   }
 }
 
@@ -81,7 +89,7 @@ export default class GameStore {
       return Array(this.WIDTH)
         .fill(undefined)
         .map(() => {
-          return new Cell(0, false);
+          return new Cell(0, false, false);
         });
     });
 
@@ -144,7 +152,16 @@ export default class GameStore {
     newBoard[x][y].open();
     this.saveBoard(newBoard);
   }
-
+  pickFlag(x: number, y: number) {
+    const newBoard = [...this.board];
+    newBoard[x][y].pickFlag();
+    this.saveBoard(newBoard);
+  }
+  removeFlag(x: number, y: number) {
+    const newBoard = [...this.board];
+    newBoard[x][y].removeFlag();
+    this.saveBoard(newBoard);
+  }
   openMines() {
     const newBoard = [...this.board];
     for (let x = 0; x < newBoard.length; x++) {

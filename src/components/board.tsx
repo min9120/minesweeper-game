@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import * as React from 'react';
+
 import styled from 'styled-components';
 import { GlobalStateContext } from '../modules';
 import { Cell } from '../modules/gameStore';
@@ -22,17 +23,14 @@ const Board = observer(() => {
     game.checkWin();
   }
 
-  function onRightClickHandler(e: React.MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    if (e.currentTarget.innerText === '') {
-      e.currentTarget.innerText = '🚩';
-      e.currentTarget.disabled = true;
-      game.saveMineCount(game.mineCount - 1);
-    } else {
-      e.currentTarget.innerText = '';
-      e.currentTarget.disabled = false;
+  function onRightClickHandler(cell: Cell, pos: { x: number; y: number }) {
+    if (cell.isPicked) {
+      game.removeFlag(pos.x, pos.y);
       game.saveMineCount(game.mineCount + 1);
+      return;
     }
+    game.pickFlag(pos.x, pos.y);
+    game.saveMineCount(game.mineCount - 1);
   }
 
   return (
@@ -42,12 +40,18 @@ const Board = observer(() => {
           return (
             <GridItemWrapper key={y}>
               <GridButton
+                disabled={cell.isPicked}
                 isOpen={cell.isOpen}
                 onClick={() => {
                   onClickHandler(cell, { x, y });
                 }}
-                onContextMenu={onRightClickHandler}
-              />
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  onRightClickHandler(cell, { x, y });
+                }}
+              >
+                {cell.isPicked ? '🚩' : ''}
+              </GridButton>
               <GridItem>{cell.isZero() ? '' : cell.isMine() ? '💣' : cell.cell}</GridItem>
             </GridItemWrapper>
           );
