@@ -184,7 +184,9 @@ export default class GameStore {
         newBoard[x][y].cell === 0 && zeroInCell.push({ x, y });
       }
     }
-
+    // 나 자신
+    cellOpen(x, y);
+    // 윗줄
     if (x > 0) {
       cellOpen(x - 1, y);
 
